@@ -1,8 +1,8 @@
-const productsSchema = require("../../models/products.js");
+const buyplanesSchema = require("../../models/buy-planes.js");
 const { uploadImage, deleteImage } = require("../../utils/cloudinary.js");
 const fs = require('fs-extra')
 
-const editProduct = async (req, res) => {
+const editPlane = async (req, res) => {
     const product = req.body;
     const imagesFiles = req.files || [];
     const filesArray = Object.values(imagesFiles).map((file, index) => ({
@@ -22,7 +22,7 @@ const editProduct = async (req, res) => {
         });
         product.images = existingImages ? [...existingImages, ...results] : results;
 
-        await productsSchema.findOneAndUpdate(
+        await buyplanesSchema.findOneAndUpdate(
             { _id: product._id },
             {
                 $set:
@@ -60,7 +60,7 @@ const editProduct = async (req, res) => {
             });
         }
 
-        let allProductsUpdated = await productsSchema.find();
+        let allProductsUpdated = await buyplanesSchema.find();
         res.status(200).json(allProductsUpdated);
     } catch (error) {
         for (let i = 0; i < filesArray.length; i++) {
@@ -74,4 +74,4 @@ const editProduct = async (req, res) => {
     }
 };
 
-module.exports = editProduct;
+module.exports = editPlane;

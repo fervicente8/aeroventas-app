@@ -1,14 +1,14 @@
-const productsSchema = require("../../models/products.js");
+const buyplanesSchema = require("../../models/buy-planes.js");
 const { deleteImage } = require("../../utils/cloudinary.js");
 
-const deleteProduct = async (req, res) => {
+const deletePlane = async (req, res) => {
     try {
-        const product = await productsSchema.findOne({ _id: req.params.id });
+        const product = await buyplanesSchema.findOne({ _id: req.params.id });
         if (product) {
             for (let i = 0; i < product.images.length; i++) {
                 await deleteImage(product.images[i].public_id);
             }
-            await productsSchema.findByIdAndDelete(req.params.id);
+            await buyplanesSchema.findByIdAndDelete(req.params.id);
             res.status(200).json(product);
         } else {
             res.status(404).json({ error: "product not found" });
@@ -19,4 +19,4 @@ const deleteProduct = async (req, res) => {
 };
 
 
-module.exports = deleteProduct;
+module.exports = deletePlane;
