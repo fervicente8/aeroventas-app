@@ -24,7 +24,7 @@ const addPlane = async (req, res) => {
             }
             res.status(200).json(product);
         } else {
-            res.status(400).json({ error: "image not found" });
+            res.status(404).json({ error: "image not found" });
         }
     } catch (error) {
         for (let i = 0; i < filesArray.length; i++) {
@@ -34,7 +34,7 @@ const addPlane = async (req, res) => {
                 }
             });
         }
-        res.status(400).json({ error: error });
+        res.status(500).json({ error: error });
     }
 };
 

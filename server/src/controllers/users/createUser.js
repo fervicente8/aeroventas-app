@@ -28,13 +28,13 @@ const createUser = async (req, res) => {
             }
         }
 
-        res.json(user);
+        res.status(200).json(user);
 
     } catch (error) {
         if (profilePicture) {
             await fs.remove(profilePicture.tempFilePath);
         }
-        res.json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 
