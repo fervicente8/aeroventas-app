@@ -26,6 +26,8 @@ const createUser = async (req, res) => {
             if (profilePicture) {
                 await fs.remove(profilePicture.tempFilePath);
             }
+        } else {
+            res.status(409).json({ error: "User already exists" });
         }
 
         res.status(200).json(user);
