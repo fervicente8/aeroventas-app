@@ -6,7 +6,7 @@ const loginUser = async (req, res) => {
         const user = await usersSchema.findOne({ email: req.body.email });
 
         if (!user) {
-            return res.status(401).json({ error: "Invalid credentials" });
+            return res.status(401).json({ error: "invalid_credentials" });
         }
 
         const validPassword = await bcrypt.compare(req.body.password, user.password);
@@ -14,7 +14,7 @@ const loginUser = async (req, res) => {
         if (validPassword) {
             res.status(200).json(user);
         } else {
-            res.status(401).json({ error: "Invalid credentials" });
+            res.status(401).json({ error: "invalid_credentials" });
         }
     } catch (error) {
         res.status(500).json({ error: error.message });

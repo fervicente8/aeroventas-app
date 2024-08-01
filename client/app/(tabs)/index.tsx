@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Link } from "expo-router";
-import Searcher from "@/components/Searcher/Searcher";
+import Searcher from "@/components/searcher/Searcher";
 
 export default function HomeScreen() {
   return (
@@ -20,7 +20,7 @@ export default function HomeScreen() {
             width: 200,
             height: 200,
             position: "absolute",
-            top: -30,
+            top: 20,
             left: "50%",
             transform: [{ translateX: -100 }],
           }}

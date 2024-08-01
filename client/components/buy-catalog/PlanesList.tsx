@@ -2,7 +2,7 @@ import { Animated, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import Card from "./Card";
-import FilterAndSortComponent from "../Searcher/FilterAndSortComponent";
+import FilterAndSortComponent from "../searcher/FilterAndSortComponent";
 
 import planes from "./planes.json";
 

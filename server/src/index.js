@@ -18,7 +18,7 @@ app.use(fileUpload({
 }));
 
 // Configuraciones
-app.use(cors({ origin: ['https://ecommerce-client-fer-vicente.vercel.app/', 'http://localhost:3000'] }));
+app.use(cors({ origin: ['url/app-web', 'http://localhost:8081', 'http://10.0.2.2:8081'] }));
 app.use("/", routes);
 
 // Inicia el servidor

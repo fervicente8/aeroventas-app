@@ -26,4 +26,5 @@ export const Colors = {
 };
 
 // Primary color: #2B63AA
-// Secondary color: #333333
+// Secondary color: #DA373A
+// Third color: #333333
