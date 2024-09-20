@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const loginUser = async (req, res) => {
     try {
-        const user = await usersSchema.findOne({ email: req.body.email });
+        const user = await usersSchema.findOne({ email: { $regex: req.body.email, $options: 'i' } });
 
         if (!user) {
             return res.status(401).json({ error: "invalid_credentials" });
