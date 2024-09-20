@@ -16,7 +16,7 @@ const reviewSchema = mongoose.Schema({
         type: String,
         trim: true
     },
-    createdAt: {
+    created_at: {
         type: Date,
         default: Date.now
     }
@@ -26,21 +26,13 @@ const documentSchema = mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['Documento Nacional de Identidad (DNI)', 'Pasaporte', 'Licencia de Piloto Privado (PPL)', 'Licencia de Piloto Comercial (CPL)', 'Certificación Médica Aeronautica (CMA)', 'Otro']
+        enum: ['dni', 'license', 'cma']
     },
-    document_id: {
-        type: String,
+    files_url: {
+        type: [String],
         required: true
     },
-    expiration_date: {
-        type: Date,
-        required: true
-    },
-    file_url: {
-        type: String,
-        required: true
-    },
-    createdAt: {
+    created_at: {
         type: Date,
         default: Date.now
     },
@@ -92,9 +84,14 @@ const userSchema = mongoose.Schema({
     reviews_given: [reviewSchema],
     reviews_received: [reviewSchema],
     documents: [documentSchema],
-    createdAt: {
+    created_at: {
         type: Date,
         default: Date.now
+    },
+    type: {
+        type: String,
+        default: "user",
+        enum: ["user", "admin", "airline", "hangar"]
     }
 });
 

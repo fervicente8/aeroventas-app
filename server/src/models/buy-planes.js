@@ -24,6 +24,14 @@ const buyplanesSchema = mongoose.Schema({
         type: Number,
         required: true
     },
+    remainder_motor_hours: {
+        type: Number,
+        required: true
+    },
+    remainder_propeller_hours: {
+        type: Number,
+        required: true
+    },
     engine_model: {
         type: String,
         trim: true,
@@ -36,7 +44,8 @@ const buyplanesSchema = mongoose.Schema({
     documentation_status: {
         type: String,
         trim: true,
-        required: true
+        required: true,
+        enum: ["under_revision", "ready_to_transfer", "ready_to_fly"]
     },
     description: {
         type: String,
@@ -50,7 +59,13 @@ const buyplanesSchema = mongoose.Schema({
         }],
         required: true
     },
-    createdAt: {
+    status: {
+        type: String,
+        trim: true,
+        default: "active",
+        enum: ["active", "sold", "deleted", "negotiation"]
+    },
+    created_at: {
         type: Date,
         default: Date.now
     }

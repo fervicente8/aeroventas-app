@@ -1,39 +1,34 @@
 const buyplanesSchema = require("../../models/buy-planes.js");
-const { uploadImage } = require("../../utils/cloudinary.js");
+const { uploadPlaneImage } = require("../../utils/cloudinary.js");
 const fs = require('fs-extra')
 
 const addPlane = async (req, res) => {
-    const product = new buyplanesSchema(req.body);
-    const imagesFiles = req.files || [];
-    const filesArray = imagesFiles.images
+    const planeObj = JSON.parse(req.body.airplane);
+    const plane = new buyplanesSchema(planeObj);
+    const airplaneImages = req.files;
 
     try {
-        if (filesArray.length > 0 || product._id) {
-            const uploadPromises = filesArray.map((file) => {
-                return uploadImage(file.tempFilePath)
+        if (airplaneImages) {
+            const uploadPromises = Object.keys(airplaneImages).map(async (key) => {
+                const file = airplaneImages[key];
+                const result = await uploadPlaneImage(file.tempFilePath);
+                await fs.remove(file.tempFilePath);
+                return {
+                    public_id: result.public_id,
+                    secure_url: result.secure_url
+                };
             });
-            const results = await Promise.all(uploadPromises);
-            product.images = results;
-            await product.save();
-            for (let i = 0; i < filesArray.length; i++) {
-                fs.remove(filesArray[i].tempFilePath, (err) => {
-                    if (err) {
-                        console.error("File not deleted:", err);
-                    }
-                });
-            }
-            res.status(200).json(product);
+
+            const planeImagesPromise = await Promise.all(uploadPromises);
+
+            plane.images = planeImagesPromise;
+
+            await plane.save();
+            res.status(200).json(plane);
         } else {
             res.status(404).json({ error: "image not found" });
         }
     } catch (error) {
-        for (let i = 0; i < filesArray.length; i++) {
-            fs.remove(filesArray[i].tempFilePath, (err) => {
-                if (err) {
-                    console.error("File not deleted:", err);
-                }
-            });
-        }
         res.status(500).json({ error: error });
     }
 };

@@ -11,13 +11,19 @@ cloudinary.config({
 
 const uploadPlaneImage = async (filePath) => {
     return await cloudinary.uploader.upload(filePath, {
-        folder: "aeroventas-planes",
+        folder: "aeroventas/aeroventas-planes",
     });
 };
 
 const uploadProfileImage = async (filePath) => {
     return await cloudinary.uploader.upload(filePath, {
-        folder: "aeroventas-users",
+        folder: "aeroventas/aeroventas-users",
+    });
+};
+
+const uploadDocumentImage = async (filePath) => {
+    return await cloudinary.uploader.upload(filePath, {
+        folder: "aeroventas/aeroventas-documents",
     });
 };
 
@@ -25,4 +31,4 @@ const deleteImage = async (public_id) => {
     return await cloudinary.uploader.destroy(public_id);
 };
 
-module.exports = { uploadPlaneImage, uploadProfileImage, deleteImage };
+module.exports = { uploadPlaneImage, uploadProfileImage, uploadDocumentImage, deleteImage };

@@ -1,76 +1,66 @@
 const buyplanesSchema = require("../../models/buy-planes.js");
-const { uploadImage, deleteImage } = require("../../utils/cloudinary.js");
+const { uploadPlaneImage, deleteImage } = require("../../utils/cloudinary.js");
 const fs = require('fs-extra')
 
 const editPlane = async (req, res) => {
-    const product = req.body;
-    const imagesFiles = req.files || [];
-    const filesArray = Object.values(imagesFiles).map((file, index) => ({
-        ...file
-    }));
-    let existingImages = JSON.parse(product.images)?.filter(image => image.file.secure_url || image.file.public_id);
-    existingImages = existingImages.map(el => el.file)
+    const { airplane, oldImages, imagesToDelete } = req.body;
+    const airplaneObj = JSON.parse(airplane);
+    const oldImagesArray = JSON.parse(oldImages);
+    const imagesToDeleteArray = JSON.parse(imagesToDelete);
+
+    const airplaneImages = req.files;
 
     try {
-        const uploadPromises = filesArray.map((file) => uploadImage(file.tempFilePath));
-        let results = await Promise.all(uploadPromises);
-        results = results.map(el => {
-            return {
-                public_id: el.public_id,
-                secure_url: el.secure_url,
-            }
-        });
-        product.images = existingImages ? [...existingImages, ...results] : results;
+        let totalPlaneImages = oldImagesArray;
+        if (airplaneImages) {
+            const uploadPromises = Object.keys(airplaneImages).map(async (key) => {
+                const file = airplaneImages[key];
+                const result = await uploadPlaneImage(file.tempFilePath);
+                await fs.remove(file.tempFilePath);
+                return {
+                    public_id: result.public_id,
+                    secure_url: result.secure_url
+                };
+            });
 
+            const planeImagesPromise = await Promise.all(uploadPromises);
+            totalPlaneImages = [...totalPlaneImages, ...planeImagesPromise];
+        }
+
+        if (imagesToDeleteArray.length > 0) {
+            const deletePromises = imagesToDeleteArray.map(async (key) => {
+                await deleteImage(key.public_id);
+            });
+            await Promise.all(deletePromises);
+        }
+
+        airplaneObj.images = totalPlaneImages;
         await buyplanesSchema.findOneAndUpdate(
-            { _id: product._id },
+            { _id: airplaneObj._id },
             {
                 $set:
                 {
-                    productName: product.productName,
-                    productStatus: product.productStatus,
-                    images: product.images,
-                    description: product.description,
-                    brand: product.brand,
-                    price: product.price,
-                    category: product.category.split(","),
-                    LWH: product.lwh !== "Alto*Ancho*Largo" ? product.lwh : null,
-                    weight: product.weight,
-                    sku: product.sku,
-                    offerStatus: product.offerStatus ? product.offerStatus : null,
-                    offerPrice: product.offerPrice,
-                    offerDuration: product.offerDuration,
-                    stock: product.stock
+                    model: airplaneObj.model,
+                    category: airplaneObj.category,
+                    brand: airplaneObj.brand,
+                    price: airplaneObj.price,
+                    total_hours: airplaneObj.total_hours,
+                    remainder_motor_hours: airplaneObj.remainder_motor_hours,
+                    remainder_propeller_hours: airplaneObj.remainder_propeller_hours,
+                    engine_model: airplaneObj.engine_model,
+                    manufacture_year: airplaneObj.manufacture_year,
+                    documentation_status: airplaneObj.documentation_status,
+                    description: airplaneObj.description,
+                    images: totalPlaneImages,
+                    status: airplaneObj.status
                 }
             }
         )
 
-        if (product.deletedImages !== undefined) {
-            let array = product.deletedImages.split(",");
-            for (let i = 0; i < array.length; i++) {
-                await deleteImage(array[i]);
-            }
-        }
-
-        for (let i = 0; i < filesArray.length; i++) {
-            fs.remove(filesArray[i].tempFilePath, (err) => {
-                if (err) {
-                    console.error("File not deleted:", err);
-                }
-            });
-        }
-
-        let allProductsUpdated = await buyplanesSchema.find();
-        res.status(200).json(allProductsUpdated);
+        res.status(200).json(airplaneObj);
     } catch (error) {
-        for (let i = 0; i < filesArray.length; i++) {
-            fs.remove(filesArray[i].tempFilePath, (err) => {
-                if (err) {
-                    console.error("File not deleted:", err);
-                }
-            });
-        }
         res.status(400).json({ error: error });
+        console.log(error);
     }
 };
 
