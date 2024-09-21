@@ -16,6 +16,7 @@ const getStore = require('./controllers/store/getStore');
 const editStore = require('./controllers/store/editStore');
 const addStore = require('./controllers/store/addStore');
 const searchUser = require('./controllers/users/searchUser');
+const changeDocumentStatusById = require('./controllers/users/changeDocumentStatusById');
 
 // Rutas
 router.get('/get-store-data', getStore)
@@ -33,6 +34,7 @@ router.put('/login-user', loginUser)
 router.put('/edit-buy-plane', editPlane)
 router.put('/edit-user', editUser)
 router.put('/search-user-by-term', searchUser)
+router.put('/update-document-status', changeDocumentStatusById)
 
 router.delete('/delete-buy-plane/:id', deletePlaneById)
 
