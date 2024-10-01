@@ -1,20 +1,29 @@
 import { useState } from "react";
 import { StyleSheet } from "react-native";
 import ProfileHeader from "./ProfileHeader";
-
-import { ThemedView } from "../ThemedView";
 import ProfileBody from "./ProfileBody";
 import ProfileDocuments from "./ProfileDocuments";
 import ProfileBuyedPlanes from "./ProfileBuyedPlanes";
 import ProfileRentedPlanes from "./ProfileRentedPlanes";
 import ProfileReviews from "./ProfileReviews";
 import ProfileSettings from "./ProfileSettings";
+import Alert from "@/components/alerts/Alert";
+
+import { ThemedView } from "../ThemedView";
+
+interface Document {
+  type: string;
+  files_url: [string];
+  created_at: Date;
+  status: string;
+}
 
 interface Props {
   user: {
     _id: string;
     name: string;
     last_name: string;
+    password: string;
     email: string;
     profile_picture?: {
       public_id: string;
@@ -25,14 +34,19 @@ interface Props {
     rented_planes: [object];
     reviews_given: [object];
     reviews_received: [object];
-    documents: [object];
-    created_at?: Date;
+    documents: [Document];
+    created_at: Date;
+    type: string;
   };
+  setUser: (user: any) => void;
   onLogout: () => void;
 }
 
-export default function ProfileTab({ user, onLogout }: Props) {
+export default function ProfileTab({ user, setUser, onLogout }: Props) {
   const [selectedTab, setSelectedTab] = useState("profile");
+  const [showAlert, setShowAlert] = useState<{
+    message: string;
+  } | null>(null);
 
   return (
     <ThemedView style={styles.container}>
@@ -40,6 +54,8 @@ export default function ProfileTab({ user, onLogout }: Props) {
         name={user.name}
         last_name={user.last_name}
         profile_picture={user.profile_picture}
+        created_at={user.created_at}
+        type={user.type}
         selectedTab={selectedTab}
         setTab={setSelectedTab}
       />
@@ -47,7 +63,11 @@ export default function ProfileTab({ user, onLogout }: Props) {
       {selectedTab === "profile" ? (
         <ProfileBody user={user} setTab={setSelectedTab} />
       ) : selectedTab === "profile-documents" ? (
-        <ProfileDocuments documents={user.documents} />
+        <ProfileDocuments
+          user={user}
+          setUser={setUser}
+          setShowAlert={setShowAlert}
+        />
       ) : selectedTab === "profile-buyed-planes" ? (
         <ProfileBuyedPlanes />
       ) : selectedTab === "profile-rented-planes" ? (
@@ -55,8 +75,20 @@ export default function ProfileTab({ user, onLogout }: Props) {
       ) : selectedTab === "profile-reviews" ? (
         <ProfileReviews />
       ) : selectedTab === "profile-settings" ? (
-        <ProfileSettings />
+        <ProfileSettings
+          user={user}
+          setUser={setUser}
+          setShowAlert={setShowAlert}
+          onLogout={onLogout}
+        />
       ) : null}
+
+      {showAlert && (
+        <Alert
+          closeAlert={() => setShowAlert(null)}
+          message={showAlert.message}
+        />
+      )}
     </ThemedView>
   );
 }

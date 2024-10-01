@@ -5,27 +5,23 @@ import { ThemedView } from "../ThemedView";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function Card(props: {
-  id: number;
+  _id: string;
   model: string;
   price: number;
   manufacture_year: number;
-  images: string[];
+  images: any[];
 }) {
-  let modelFormatted;
-  if (props.model.length > 18) {
-    modelFormatted = props.model.substring(0, 18 - 3) + "...";
-  } else {
-    modelFormatted = props.model;
-  }
-
   const priceFormatted = props.price
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
   return (
-    <Link href={`/buy-plane/${props.id}`} asChild>
+    <Link href={`/buy-plane/${props._id}`} asChild>
       <Pressable style={styles.card_container}>
-        <Image source={{ uri: props.images[0] }} style={styles.card_img} />
+        <Image
+          source={{ uri: props.images[0].secure_url }}
+          style={styles.card_img}
+        />
         <ThemedView style={styles.card_content_container}>
           <ThemedText
             style={{
@@ -34,8 +30,10 @@ export default function Card(props: {
               maxWidth: "100%",
               marginBottom: 5,
             }}
+            numberOfLines={1}
+            ellipsizeMode='tail'
           >
-            {modelFormatted}
+            {props.model}
           </ThemedText>
           <ThemedView
             style={{
@@ -70,8 +68,8 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "white",
     shadowColor: "#000",
-    shadowRadius: 3,
-    elevation: 5,
+    shadowRadius: 1,
+    elevation: 2,
     maxWidth: "50%",
   },
   card_img: {

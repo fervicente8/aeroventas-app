@@ -3,7 +3,7 @@ const { uploadDocumentImage } = require("../../utils/cloudinary.js");
 const fs = require('fs-extra');
 
 const addUserDocument = async (req, res) => {
-    const { user_id, type, created_at } = req.body;
+    const { user_id, type, created_at, license_type } = req.body;
     const documentImages = req.files;
 
     const user = await usersSchema.findById(user_id);
@@ -14,7 +14,8 @@ const addUserDocument = async (req, res) => {
     const document = {
         type,
         files_url: [],
-        created_at
+        created_at,
+        license_type,
     };
 
     try {

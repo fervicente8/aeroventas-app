@@ -17,12 +17,18 @@ const editStore = require('./controllers/store/editStore');
 const addStore = require('./controllers/store/addStore');
 const searchUser = require('./controllers/users/searchUser');
 const changeDocumentStatusById = require('./controllers/users/changeDocumentStatusById');
+const suspendUserById = require('./controllers/users/suspendUserById');
+const deleteUserById = require('./controllers/users/deleteUserById');
+const getUserDocuments = require('./controllers/users/getUserDocuments');
+const getPendingDocuments = require('./controllers/users/getPendingDocuments');
 
 // Rutas
 router.get('/get-store-data', getStore)
 router.get('/get-user-by-id/:id', getUserById)
 router.get('/get-all-buy-planes', getAllPlanes)
 router.get('/get-plane-by-id/:id', getPlaneById)
+router.get('/get-user-documents/:id', getUserDocuments)
+router.get('/get-pending-documents', getPendingDocuments)
 
 router.post('/create-store', addStore)
 router.post('/create-user', createUser)
@@ -35,7 +41,9 @@ router.put('/edit-buy-plane', editPlane)
 router.put('/edit-user', editUser)
 router.put('/search-user-by-term', searchUser)
 router.put('/update-document-status', changeDocumentStatusById)
+router.put('/suspend-user-by-id/:id', suspendUserById)
 
 router.delete('/delete-buy-plane/:id', deletePlaneById)
+router.delete('/delete-user-by-id/:id', deleteUserById)
 
 module.exports = router

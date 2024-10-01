@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
-import { StyleSheet, Animated, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { StyleSheet, Animated, PanResponder } from "react-native";
+import { Href, useRouter } from "expo-router";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "../ThemedView";
@@ -32,9 +32,21 @@ export default function Alert({
 
   const handleRedirect = () => {
     if (redirectTo) {
-      router.push(redirectTo);
+      router.push(redirectTo as Href<string>);
     }
   };
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderMove: () => false,
+    onPanResponderRelease: () => {
+      closeAlert();
+    },
+  });
+
+  setTimeout(() => {
+    closeAlert();
+  }, 5000);
 
   return (
     <Animated.View
@@ -42,6 +54,7 @@ export default function Alert({
         styles.container,
         { opacity: fadeAnim, transform: [{ translateY: fadeAnim }] },
       ]}
+      {...panResponder.panHandlers}
     >
       <ThemedText style={styles.message}>{message}</ThemedText>
       <ThemedView style={styles.buttons_container}>
@@ -50,9 +63,6 @@ export default function Alert({
             {redirectToText}
           </ThemedText>
         )}
-        <ThemedText onPress={closeAlert} style={styles.button}>
-          Cerrar
-        </ThemedText>
       </ThemedView>
     </Animated.View>
   );
@@ -60,9 +70,9 @@ export default function Alert({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#00000095",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     position: "absolute",
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
     zIndex: 10,
@@ -89,7 +99,6 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#2B63AA",
     color: "white",
-    fontWeight: "600",
     borderRadius: 5,
     padding: 8,
     fontSize: 16,

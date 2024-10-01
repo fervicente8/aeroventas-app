@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import Alert from "@/components/alerts/Alert";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 
 interface User {
   email: string;
@@ -20,6 +21,7 @@ interface User {
 }
 
 export default function Login() {
+  const [loadingLogin, setLoadingLogin] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   const [userData, setUserData] = useState<User>({
     email: "",
@@ -30,6 +32,7 @@ export default function Login() {
   const [showAlert, setShowAlert] = useState<{
     message: string;
   } | null>(null);
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const handleChange = (name: string, value: string) => {
     setUserData(() => ({ ...userData, [name]: value }));
@@ -54,8 +57,10 @@ export default function Login() {
     }
     setError(null);
 
+    setLoadingLogin(true);
+
     try {
-      const response = await fetch("http://10.0.2.2:3001/login-user", {
+      const response = await fetch(`${apiUrl}/login-user`, {
         method: "PUT",
         body: JSON.stringify(userData),
         headers: {
@@ -67,16 +72,20 @@ export default function Login() {
 
       if (response.status === 401) {
         setError(data.error);
+        setLoadingLogin(false);
+        return;
       } else {
         await AsyncStorage.setItem("authToken", data._id);
         await AsyncStorage.setItem("user", JSON.stringify(data));
         router.replace("/(tabs)/profile");
+        setLoadingLogin(false);
       }
     } catch (error) {
       console.error(error);
       setShowAlert({
         message: "Error al iniciar sesión. Por favor, inténtelo de nuevo.",
       });
+      setLoadingLogin(false);
     }
   };
 
@@ -187,12 +196,24 @@ export default function Login() {
           </TouchableOpacity>
         </ThemedView>
 
-        <TouchableOpacity
-          onPress={() => handleSubmit()}
-          style={styles.submit_button_container}
-        >
-          <ThemedText style={styles.submit_button_text}>Ingresar</ThemedText>
-        </TouchableOpacity>
+        {loadingLogin ? (
+          <LoadingSpinner
+            size='small'
+            style={{
+              marginTop: 30,
+              backgroundColor: "white",
+              borderRadius: 3,
+              padding: 12,
+            }}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={() => handleSubmit()}
+            style={styles.submit_button_container}
+          >
+            <ThemedText style={styles.submit_button_text}>Ingresar</ThemedText>
+          </TouchableOpacity>
+        )}
         {error === "invalid_credentials" ? (
           <ThemedText style={styles.credentials_error_text}>
             Datos de inicio de sesión incorrectos

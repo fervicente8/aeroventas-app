@@ -45,7 +45,12 @@ export default function HomeScreen() {
         <ThemedText style={styles.description}>
           Encuentra los mejores aviones en venta de Argentina.
         </ThemedText>
-        <Link href='/buy-catalog'>
+        <Link
+          href={{
+            pathname: "/(tabs)/buy-catalog/[cat_brand]",
+            params: { cat_brand: "all//all" },
+          }}
+        >
           <TabBarIcon
             style={styles.redirectIcon}
             name={"arrow-forward-circle-outline"}
@@ -87,6 +92,7 @@ const styles = StyleSheet.create({
   homeContainer: {
     flex: 1,
     overflow: "scroll",
+    backgroundColor: "white",
   },
   imageContainer: {
     height: 500,
@@ -115,6 +121,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 30,
     alignItems: "center",
+    backgroundColor: "transparent",
   },
   icon: {
     fontSize: 60,

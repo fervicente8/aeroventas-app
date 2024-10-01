@@ -7,7 +7,7 @@ import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 
 interface Plane {
-  id: number;
+  _id: string;
   model: string;
   price: number;
   manufacture_year: number;
@@ -21,18 +21,18 @@ export default function FilterAndSortComponent(props: {
   searcherCat: string;
   searcherBrand: string;
 }) {
+  const { allPlanes, setFilteredPlanes, searcherCat, searcherBrand } = props;
+
   const todayYear = new Date().getFullYear();
   const getMaxPrice = () => {
     let max = 0;
-    props.allPlanes.forEach((plane) => {
+    allPlanes.forEach((plane) => {
       if (plane.price > max) {
         max = plane.price;
       }
     });
     return max;
   };
-
-  const { allPlanes, setFilteredPlanes, searcherCat, searcherBrand } = props;
 
   const [searcher, setSearcher] = useState({
     cat: searcherCat || "all",
@@ -49,6 +49,13 @@ export default function FilterAndSortComponent(props: {
   });
 
   useEffect(() => {
+    setSearcher(() => ({
+      ...searcher,
+      max_price: getMaxPrice(),
+    }));
+  }, [allPlanes]);
+
+  useEffect(() => {
     setSearcher((prevSearcher) => ({
       ...prevSearcher,
       cat: searcherCat || prevSearcher.cat,
@@ -57,6 +64,16 @@ export default function FilterAndSortComponent(props: {
   }, [searcherCat || searcherBrand]);
 
   const onChangeSearcher = (key: string, value: any) => {
+    if (
+      (key === "min_price" ||
+        key === "max_price" ||
+        key === "min_manufacture_year" ||
+        key === "max_manufacture_year") &&
+      isNaN(value)
+    ) {
+      value = 0;
+    }
+
     setSearcher((prevSearcher) => ({
       ...prevSearcher,
       [key]: value,
@@ -346,14 +363,10 @@ export default function FilterAndSortComponent(props: {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
     backgroundColor: "#2B63AA",
     padding: 20,
-    borderBottomLeftRadius: 5,
-    borderBottomRightRadius: 5,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     shadowColor: "#000",
     elevation: 5,
   },

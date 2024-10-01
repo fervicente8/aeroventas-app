@@ -1,8 +1,15 @@
-import { useEffect, useState } from "react";
-import { TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+  Linking,
+  ScrollView,
+} from "react-native";
 import { Link } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ProfileTab from "@/components/profile/ProfileTab";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -17,10 +24,9 @@ interface Review {
 
 interface Document {
   type: string;
-  document_id: string;
-  expiration_date: Date;
-  file_url: string;
+  files_url: [string];
   created_at: Date;
+  status: string;
 }
 
 interface UserProfilePicture {
@@ -35,6 +41,8 @@ interface Plane {
   brand: string;
   price: number;
   total_hours: number;
+  remainder_motor_hours: number;
+  remainder_propeller_hours: number;
   engine_model: string;
   manufacture_year: number;
   documentation_status: string;
@@ -55,45 +63,117 @@ interface User {
   reviews_given: [Review];
   reviews_received: [Review];
   documents: [Document];
-  created_at?: Date;
+  created_at: Date;
+  type: string;
+  status: string;
 }
 
 export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingStore, setIsLoadingStore] = useState(true);
+  const [errorFetching, setErrorFetching] = useState(false);
+  const [storeEmail, setStoreEmail] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User>({} as User);
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  const checkAuth = async () => {
+    try {
+      setIsLoading(true);
+      setIsLoadingStore(true);
+      setErrorFetching(false);
+
+      const token = await AsyncStorage.getItem("authToken");
+
+      if (token) {
+        const userString = await AsyncStorage.getItem("user");
+        const userJson = JSON.parse(userString || "{}");
+
+        const userResponse = await fetch(
+          `${apiUrl}/get-user-by-id/${userJson._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await userResponse.json();
+        setUser(data);
+        await AsyncStorage.setItem("user", JSON.stringify(data));
+        setIsAuthenticated(true);
+
+        const storeResponse = await fetch(`${apiUrl}/get-store-data`);
+        const storeData = await storeResponse.json();
+        setIsLoading(false);
+
+        setStoreEmail(storeData[0].email);
+        setIsLoadingStore(false);
+      } else {
+        setIsLoading(false);
+        setIsLoadingStore(false);
+        setIsAuthenticated(false);
+        setErrorFetching(true);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setIsLoadingStore(false);
+      setIsAuthenticated(false);
+      setErrorFetching(true);
+    }
+  };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (token) {
-          const userString = await AsyncStorage.getItem("user");
-          const userJson = JSON.parse(userString || "{}");
-          setUser(userJson);
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Error al verificar autenticación:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     checkAuth();
   }, []);
 
-  if (isLoading) {
-    return <ActivityIndicator size='large' color='#0000ff' />;
+  const onRefresh = useCallback(() => {
+    checkAuth();
+  }, []);
+
+  if (isLoading || isLoadingStore || errorFetching) {
+    return (
+      <LoadingSpinner
+        fullScreen={true}
+        size='large'
+        text='Cargando perfil'
+        error={errorFetching}
+        fetchFunction={checkAuth}
+      />
+    );
+  }
+
+  if (user.status === "suspended") {
+    const handleEmail = () => {
+      Linking.openURL(`mailto:${storeEmail}`);
+    };
+
+    return (
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading || isLoadingStore}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+        <ThemedText style={styles.authText}>Cuenta suspendida</ThemedText>
+        <TouchableOpacity style={styles.authButton} onPress={handleEmail}>
+          <ThemedText style={{ color: "white" }}>Hablar con soporte</ThemedText>
+        </TouchableOpacity>
+      </ScrollView>
+    );
   }
 
   return (
     <ThemedView style={styles.container}>
       {isAuthenticated ? (
-        <ProfileTab user={user} onLogout={() => setIsAuthenticated(false)} />
+        <ProfileTab
+          user={user}
+          onLogout={() => setIsAuthenticated(false)}
+          setUser={setUser}
+        />
       ) : (
         <ThemedView style={styles.authContainer}>
           <ThemedText style={styles.authText}>Debes iniciar sesión</ThemedText>

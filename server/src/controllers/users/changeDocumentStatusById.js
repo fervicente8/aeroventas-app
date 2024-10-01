@@ -3,21 +3,28 @@ const usersSchema = require("../../models/users.js");
 const changeDocumentStatusById = async (req, res) => {
     const { userId, documentId, status } = req.body;
 
-    const user = await usersSchema.findById(userId);
+    let user = await usersSchema.findById(userId);
 
     if (!user) {
         return res.status(404).json({ error: "user_not_found" });
     }
 
     try {
-        await deleteImage(image_delete_id);
+        let document = user.documents.find((doc) => doc._id.toString() === documentId);
 
-        const document = user.documents.find((doc) => doc._id === documentId);
         if (!document) {
             return res.status(404).json({ error: "document_not_found" });
         }
 
         document.status = status;
+
+        user.documents = user.documents.map((doc) => {
+            if (doc._id === documentId) {
+                return document;
+            } else {
+                return doc;
+            }
+        });
 
         await usersSchema.findByIdAndUpdate(userId, {
             $set: { documents: user.documents },

@@ -45,6 +45,7 @@ export default function Register() {
     redirectTo?: string;
     redirectToText?: string;
   } | null>(null);
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const handleChange = (name: string, value: string) => {
     setUserData(() => ({ ...userData, [name]: value }));
@@ -64,7 +65,7 @@ export default function Register() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       base64: true,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -88,7 +89,7 @@ export default function Register() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       base64: true,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -100,7 +101,7 @@ export default function Register() {
   };
 
   const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return regex.test(email);
   };
 
@@ -170,7 +171,7 @@ export default function Register() {
         } as any);
       }
 
-      const response = await fetch("http://10.0.2.2:3001/create-user", {
+      const response = await fetch(`${apiUrl}/create-user`, {
         method: "POST",
         body: formData,
         headers: {
@@ -195,15 +196,14 @@ export default function Register() {
           redirectTo: "/auth/login",
           redirectToText: "Iniciar sesión",
         });
-      } else {
-        setShowAlert({
-          message: data.error,
-        });
-        resetAll();
-        return;
       }
     } catch (error) {
-      console.error(error);
+      setShowAlert({
+        message:
+          "Hubo un error al crear tu cuenta. Por favor, intenta de nuevo.",
+      });
+      resetAll();
+      return;
     }
   };
 

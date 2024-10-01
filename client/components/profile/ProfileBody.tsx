@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -21,31 +21,30 @@ interface Props {
     reviews_given: [object];
     reviews_received: [object];
     documents: [object];
-    created_at?: Date;
+    created_at: Date;
   };
   setTab: (tab: string) => void;
 }
 
 export default function ProfileBody({ user, setTab }: Props) {
+  if (!user) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.no_user_found}>
+          Ha habido un error al cargar el perfil
+        </ThemedText>
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.follows_container}>
-        <ThemedView style={styles.follows_div}>
-          <ThemedText style={styles.text_amount}>800</ThemedText>
-          <ThemedText style={styles.text_description}>Seguidores</ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.follows_div}>
-          <ThemedText style={styles.text_amount}>743</ThemedText>
-          <ThemedText style={styles.text_description}>Seguidos</ThemedText>
-        </ThemedView>
-      </ThemedView>
-
       <ScrollView style={styles.cards_container}>
         <ThemedView style={styles.card}>
           <ThemedView style={styles.card_icon}>
             <MaterialCommunityIcons
               name='airplane-clock'
-              size={24}
+              size={22}
               color={"#2B63AA"}
             />
           </ThemedView>
@@ -70,7 +69,7 @@ export default function ProfileBody({ user, setTab }: Props) {
           onPress={() => setTab("profile-documents")}
         >
           <ThemedView style={styles.card_icon}>
-            <Ionicons name='documents' size={24} color='#2B63AA' />
+            <Ionicons name='documents' size={22} color='#2B63AA' />
           </ThemedView>
           <ThemedView style={styles.text_card_container}>
             <ThemedText style={styles.text_card_description}>
@@ -89,7 +88,7 @@ export default function ProfileBody({ user, setTab }: Props) {
           <ThemedView style={styles.card_icon}>
             <MaterialCommunityIcons
               name='airplane-plus'
-              size={24}
+              size={22}
               color='#2B63AA'
             />
           </ThemedView>
@@ -110,7 +109,7 @@ export default function ProfileBody({ user, setTab }: Props) {
           <ThemedView style={styles.card_icon}>
             <MaterialCommunityIcons
               name='airplane-takeoff'
-              size={24}
+              size={22}
               color='#2B63AA'
             />
           </ThemedView>
@@ -129,7 +128,7 @@ export default function ProfileBody({ user, setTab }: Props) {
           onPress={() => setTab("profile-reviews")}
         >
           <ThemedView style={styles.card_icon}>
-            <Ionicons name='star' size={24} color='#2B63AA' />
+            <Ionicons name='star' size={22} color='#2B63AA' />
           </ThemedView>
           <ThemedView style={styles.text_card_container}>
             <ThemedText style={styles.text_card_description}>
@@ -146,18 +145,15 @@ export default function ProfileBody({ user, setTab }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {},
-  follows_container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 20,
+  container: {
+    flex: 1,
+    paddingVertical: 20,
   },
-  follows_div: {
-    alignItems: "center",
-    gap: 3,
+  no_user_found: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "600",
+    color: "gray",
   },
   text_amount: {
     color: "#000000",
@@ -178,7 +174,7 @@ const styles = StyleSheet.create({
     gap: 5,
     backgroundColor: "#00000020",
     borderRadius: 10,
-    height: 75,
+    height: 65,
     marginBottom: 10,
   },
   text_card_container: {
@@ -203,7 +199,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   text_card_value: {
-    fontSize: 18,
     color: "gray",
     fontWeight: "bold",
   },

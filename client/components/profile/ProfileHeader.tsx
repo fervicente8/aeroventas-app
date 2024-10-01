@@ -1,10 +1,10 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
+import { Link } from "expo-router";
 
 interface Props {
   name: string;
@@ -13,6 +13,8 @@ interface Props {
     public_id: string;
     secure_url: string;
   };
+  created_at: Date;
+  type: string;
   selectedTab: string;
   setTab: (tab: string) => void;
 }
@@ -21,27 +23,41 @@ export default function ProfileHeader({
   name,
   last_name,
   profile_picture,
+  created_at,
+  type,
   selectedTab,
   setTab,
 }: Props) {
+  const date = new Date(created_at);
+  const formatedDate = date.toLocaleDateString("es-AR");
+
   return (
     <ThemedView style={styles.total_container}>
-      {/* <TouchableOpacity
-        style={styles.logout_button}
-        onPress={async () => {
-          await AsyncStorage.removeItem("authToken");
-          await AsyncStorage.removeItem("user");
-          onLogout();
-        }}
-      >
-        <Ionicons name='exit-outline' size={24} color='#DA373A' />
-      </TouchableOpacity> */}
       <SafeAreaView style={styles.container}>
+        {type === "admin" && (
+          <Link href={"/admin/admin-panel"} asChild>
+            <TouchableOpacity style={styles.admin_button}>
+              <MaterialIcons
+                name='admin-panel-settings'
+                size={30}
+                color='white'
+              />
+            </TouchableOpacity>
+          </Link>
+        )}
         <ThemedView style={styles.text_edit_button_container}>
           {selectedTab !== "profile" ? (
             <>
-              <TouchableOpacity onPress={() => setTab("profile")}>
+              <TouchableOpacity
+                onPress={() => setTab("profile")}
+                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+              >
                 <Ionicons name='chevron-back-outline' size={28} color='white' />
+                <ThemedText
+                  style={{ color: "white", fontSize: 18, fontWeight: "600" }}
+                >
+                  Mi perfil
+                </ThemedText>
               </TouchableOpacity>
             </>
           ) : (
@@ -70,6 +86,10 @@ export default function ProfileHeader({
           <ThemedText style={styles.text_name}>
             {name + " " + last_name}
           </ThemedText>
+          <ThemedText style={styles.created_at_text}>
+            Miembro desde{"\n"}
+            {formatedDate}
+          </ThemedText>
         </ThemedView>
       </SafeAreaView>
     </ThemedView>
@@ -79,13 +99,13 @@ export default function ProfileHeader({
 const styles = StyleSheet.create({
   total_container: {
     backgroundColor: "#2B63AA",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     overflow: "hidden",
   },
   container: {
     paddingTop: 5,
-    paddingBottom: 30,
+    paddingBottom: 20,
     paddingHorizontal: 20,
   },
   text_edit_button_container: {
@@ -93,7 +113,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "transparent",
-    marginBottom: 30,
+    marginBottom: 10,
     height: 40,
   },
   image_text_container: {
@@ -118,8 +138,8 @@ const styles = StyleSheet.create({
     color: "white",
   },
   profile_picture: {
-    width: 140,
-    height: 140,
+    width: 120,
+    height: 120,
     borderRadius: 70,
     borderColor: "white",
     borderWidth: 1,
@@ -130,5 +150,18 @@ const styles = StyleSheet.create({
     letterSpacing: 1.1,
     color: "white",
     textAlign: "center",
+  },
+  admin_button: {
+    position: "absolute",
+    bottom: 15,
+    left: 15,
+    zIndex: 10,
+  },
+  created_at_text: {
+    textAlign: "center",
+    color: "white",
+    fontSize: 13,
+    letterSpacing: 1.2,
+    lineHeight: 15,
   },
 });

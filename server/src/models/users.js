@@ -40,7 +40,11 @@ const documentSchema = mongoose.Schema({
         type: String,
         default: "pending",
         enum: ["pending", "accepted", "rejected"]
-    }
+    },
+    license_type: {
+        type: String,
+        enum: ["private", "comercial"]
+    },
 });
 
 const userSchema = mongoose.Schema({
@@ -92,6 +96,11 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "user",
         enum: ["user", "admin", "airline", "hangar"]
+    },
+    status: {
+        type: String,
+        default: "active",
+        enum: ["active", "inactive", "suspended"]
     }
 });
 

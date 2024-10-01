@@ -111,9 +111,12 @@ export default function Searcher() {
           borderRadius: 5,
         }}
         href={{
-          pathname: `/${selectedOption}/[cat_brand]`,
+          pathname:
+            (`/(tabs)/${selectedOption}/[cat_brand]` as "/(tabs)/buy-catalog/[cat_brand]") ||
+            "/(tabs)/rent-catalog/[cat_brand]",
           params: { cat_brand: `${searcher.cat}//${searcher.brand}` },
         }}
+        onPressOut={() => setSearcher({ cat: "all", brand: "all" })}
       >
         Buscar
       </Link>
