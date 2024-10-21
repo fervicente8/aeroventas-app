@@ -21,8 +21,10 @@ const suspendUserById = require('./controllers/users/suspendUserById');
 const deleteUserById = require('./controllers/users/deleteUserById');
 const getUserDocuments = require('./controllers/users/getUserDocuments');
 const getPendingDocuments = require('./controllers/users/getPendingDocuments');
+const fetchAndSaveAirports = require('./controllers/airports/fetchAndSaveAirports');
 
 // Rutas
+router.get('/save-airports', fetchAndSaveAirports);
 router.get('/get-store-data', getStore)
 router.get('/get-user-by-id/:id', getUserById)
 router.get('/get-all-buy-planes', getAllPlanes)

@@ -39,12 +39,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name='rent-catalog'
+        name='travel-catalog/[mode]'
         options={{
-          title: "Alquilar",
+          title: "Viajes",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "stopwatch" : "stopwatch-outline"}
+              name={focused ? "ticket" : "ticket-outline"}
               color={color}
             />
           ),

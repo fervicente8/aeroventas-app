@@ -71,6 +71,7 @@ interface User {
 export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingStore, setIsLoadingStore] = useState(true);
+  const [tries, setTries] = useState(1);
   const [errorFetching, setErrorFetching] = useState(false);
   const [storeEmail, setStoreEmail] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -81,7 +82,6 @@ export default function Profile() {
     try {
       setIsLoading(true);
       setIsLoadingStore(true);
-      setErrorFetching(false);
 
       const token = await AsyncStorage.getItem("authToken");
 
@@ -92,7 +92,7 @@ export default function Profile() {
         const userResponse = await fetch(
           `${apiUrl}/get-user-by-id/${userJson._id}`,
           {
-            method: "PUT",
+            method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
@@ -109,6 +109,7 @@ export default function Profile() {
 
         setStoreEmail(storeData[0].email);
         setIsLoadingStore(false);
+        setErrorFetching(false);
       } else {
         setIsLoading(false);
         setIsLoadingStore(false);
@@ -139,6 +140,8 @@ export default function Profile() {
         text='Cargando perfil'
         error={errorFetching}
         fetchFunction={checkAuth}
+        setTries={setTries}
+        tries={tries}
       />
     );
   }
@@ -173,6 +176,8 @@ export default function Profile() {
           user={user}
           onLogout={() => setIsAuthenticated(false)}
           setUser={setUser}
+          loading={isLoading || isLoadingStore}
+          onRefresh={onRefresh}
         />
       ) : (
         <ThemedView style={styles.authContainer}>

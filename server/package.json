@@ -8,6 +8,7 @@
     "vercel-build": "echo hello"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.2",
     "cloudinary": "^1.41.1",

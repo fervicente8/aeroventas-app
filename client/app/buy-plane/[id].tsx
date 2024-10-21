@@ -193,46 +193,51 @@ export default function PlaneView() {
                   </ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.icon_data_container}>
-                  <AntDesign name='clockcircle' size={20} color='#2B63AA' />
-                  <ThemedText style={styles.data}>
-                    {formatNumber(plane.total_hours)} horas totales
-                  </ThemedText>
-                </ThemedView>
-              </ThemedView>
-
-              <ThemedView style={styles.double_data_container}>
-                <ThemedView style={styles.icon_data_container}>
-                  <AntDesign name='clockcircle' size={20} color='#2B63AA' />
-                  <ThemedText style={styles.data}>
-                    {formatNumber(plane.remainder_motor_hours)} horas remanentes
-                  </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.icon_data_container}>
-                  <Fontisto name='propeller-1' size={20} color='#2B63AA' />
-                  <ThemedText style={styles.data}>
-                    {formatNumber(plane.remainder_propeller_hours)} horas
-                    remanentes
-                  </ThemedText>
-                </ThemedView>
-              </ThemedView>
-
-              <ThemedView style={styles.double_data_container}>
-                <ThemedView style={styles.icon_data_container}>
-                  <MaterialCommunityIcons
-                    name='engine'
-                    size={24}
-                    color='#2B63AA'
-                  />
-                  <ThemedText style={styles.data}>
-                    {plane.engine_model}
-                  </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.icon_data_container}>
                   <Ionicons name='document' size={22} color='#2B63AA' />
                   <ThemedText style={styles.data}>
                     {documentationFormatted(plane.documentation_status)}
                   </ThemedText>
                 </ThemedView>
+              </ThemedView>
+
+              <ThemedView style={styles.icon_data_container}>
+                <MaterialCommunityIcons
+                  name='engine'
+                  size={24}
+                  color='#2B63AA'
+                />
+                <ThemedText
+                  style={styles.data}
+                  ellipsizeMode='tail'
+                  numberOfLines={2}
+                >
+                  {plane.engine_model}
+                </ThemedText>
+              </ThemedView>
+
+              <ThemedView style={styles.icon_data_container_full_width}>
+                <MaterialCommunityIcons
+                  name='airplane-clock'
+                  size={22}
+                  color='#2B63AA'
+                />
+                <ThemedText style={styles.data}>
+                  {formatNumber(plane.total_hours)} horas totales de vuelo
+                </ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.icon_data_container_full_width}>
+                <AntDesign name='clockcircle' size={20} color='#2B63AA' />
+                <ThemedText style={styles.data}>
+                  {formatNumber(plane.remainder_motor_hours)} horas remanentes
+                  de motor
+                </ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.icon_data_container_full_width}>
+                <Fontisto name='propeller-1' size={20} color='#2B63AA' />
+                <ThemedText style={styles.data}>
+                  {formatNumber(plane.remainder_propeller_hours)} horas
+                  remanentes de helice
+                </ThemedText>
               </ThemedView>
             </ThemedView>
 
@@ -319,6 +324,7 @@ const styles = StyleSheet.create({
   },
   double_data_container: {
     flexDirection: "row",
+    gap: 5,
   },
   icon_data_container: {
     width: "50%",
@@ -326,8 +332,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
+  icon_data_container_full_width: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   data: {
-    fontWeight: "500",
     color: "#333333",
   },
   icon_data_container_contact: {

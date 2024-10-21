@@ -370,7 +370,8 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     flex: 1,
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   back_button: {
     flexDirection: "row",

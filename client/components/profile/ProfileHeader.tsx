@@ -13,6 +13,7 @@ interface Props {
     public_id: string;
     secure_url: string;
   };
+  documents?: any;
   created_at: Date;
   type: string;
   selectedTab: string;
@@ -23,6 +24,7 @@ export default function ProfileHeader({
   name,
   last_name,
   profile_picture,
+  documents,
   created_at,
   type,
   selectedTab,
@@ -30,6 +32,26 @@ export default function ProfileHeader({
 }: Props) {
   const date = new Date(created_at);
   const formatedDate = date.toLocaleDateString("es-AR");
+
+  const findPilotDocument = () => {
+    if (documents) {
+      const document = documents.find(
+        (doc: any) =>
+          doc.type === "license" &&
+          doc.license_type === "comercial" &&
+          doc.status === "accepted"
+      );
+      if (document) {
+        return document;
+      }
+    }
+  };
+
+  const isCommercialPilot = () => {
+    if (findPilotDocument()) {
+      return true;
+    }
+  };
 
   return (
     <ThemedView style={styles.total_container}>
@@ -44,6 +66,11 @@ export default function ProfileHeader({
               />
             </TouchableOpacity>
           </Link>
+        )}
+        {isCommercialPilot() && (
+          <ThemedText style={styles.user_pilot_text}>
+            Piloto comercial
+          </ThemedText>
         )}
         <ThemedView style={styles.text_edit_button_container}>
           {selectedTab !== "profile" ? (
@@ -74,7 +101,12 @@ export default function ProfileHeader({
             </>
           )}
         </ThemedView>
-        <ThemedView style={styles.image_text_container}>
+        <ThemedView
+          style={[
+            styles.image_text_container,
+            (type === "admin" || isCommercialPilot()) && { paddingBottom: 30 },
+          ]}
+        >
           <Image
             source={
               profile_picture?.secure_url
@@ -83,13 +115,18 @@ export default function ProfileHeader({
             }
             style={styles.profile_picture}
           />
-          <ThemedText style={styles.text_name}>
-            {name + " " + last_name}
-          </ThemedText>
-          <ThemedText style={styles.created_at_text}>
-            Miembro desde{"\n"}
-            {formatedDate}
-          </ThemedText>
+          <ThemedView style={styles.text_container}>
+            <ThemedText style={styles.text_name}>
+              {name + " " + last_name}
+            </ThemedText>
+            <ThemedText
+              style={styles.created_at_text}
+              ellipsizeMode='tail'
+              numberOfLines={2}
+            >
+              Miembro desde {formatedDate}
+            </ThemedText>
+          </ThemedView>
         </ThemedView>
       </SafeAreaView>
     </ThemedView>
@@ -106,7 +143,7 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 5,
     paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   text_edit_button_container: {
     flexDirection: "row",
@@ -117,7 +154,8 @@ const styles = StyleSheet.create({
     height: 40,
   },
   image_text_container: {
-    gap: 10,
+    gap: 15,
+    flexDirection: "row",
     alignItems: "center",
     backgroundColor: "transparent",
   },
@@ -144,12 +182,15 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderWidth: 1,
   },
+  text_container: {
+    backgroundColor: "transparent",
+    gap: 5,
+  },
   text_name: {
     fontWeight: "bold",
     fontSize: 18,
     letterSpacing: 1.1,
     color: "white",
-    textAlign: "center",
   },
   admin_button: {
     position: "absolute",
@@ -157,8 +198,20 @@ const styles = StyleSheet.create({
     left: 15,
     zIndex: 10,
   },
-  created_at_text: {
+  user_pilot_text: {
+    position: "absolute",
+    bottom: 15,
+    left: 15,
+    right: 15,
+    color: "#D4AF37",
+    letterSpacing: 1.2,
     textAlign: "center",
+    fontWeight: "600",
+    textShadowColor: "rgba(212, 175, 55, 0.55)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
+  },
+  created_at_text: {
     color: "white",
     fontSize: 13,
     letterSpacing: 1.2,

@@ -176,7 +176,9 @@ export default function ManageUserById({
                   >
                     <ThemedText style={styles.modal_button_delete}>
                       {modalFunction === "suspendUser"
-                        ? "Suspender"
+                        ? user.status === "suspended"
+                          ? "Activar"
+                          : "Suspender"
                         : "Eliminar"}
                     </ThemedText>
                   </TouchableOpacity>

@@ -122,7 +122,7 @@ export default function ManageUserDocuments({
             <ThemedText style={styles.documents_title}>
               Documentos rechazados
             </ThemedText>
-            {acceptedDocuments.length === 0 ? (
+            {rejectedDocuments.length === 0 ? (
               <ThemedText style={styles.no_documents_type_text}>
                 No hay documentos rechazados
               </ThemedText>

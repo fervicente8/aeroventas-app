@@ -60,7 +60,6 @@ const editPlane = async (req, res) => {
         res.status(200).json(airplaneObj);
     } catch (error) {
         res.status(400).json({ error: error });
-        console.log(error);
     }
 };
 

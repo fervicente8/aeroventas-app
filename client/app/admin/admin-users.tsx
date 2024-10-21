@@ -106,7 +106,8 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     flex: 1,
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
     gap: 10,
   },
   back_button: {

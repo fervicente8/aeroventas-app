@@ -1,6 +1,13 @@
-import { StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedView } from "../ThemedView";
 import { ThemedText } from "../ThemedText";
@@ -22,11 +29,32 @@ interface Props {
     reviews_received: [object];
     documents: [object];
     created_at: Date;
+    type: string;
   };
   setTab: (tab: string) => void;
+  loading: boolean;
+  onRefresh: () => void;
 }
 
-export default function ProfileBody({ user, setTab }: Props) {
+export default function ProfileBody({
+  user,
+  setTab,
+  loading,
+  onRefresh,
+}: Props) {
+  const [currentUserId, setCurrentUserId] = useState<any>();
+
+  useEffect(() => {
+    (async () => {
+      const user = await AsyncStorage.getItem("user");
+      if (!user) {
+        return;
+      }
+      const userId = JSON.parse(user)._id;
+      setCurrentUserId(userId);
+    })();
+  }, []);
+
   if (!user) {
     return (
       <ThemedView style={styles.container}>
@@ -37,26 +65,52 @@ export default function ProfileBody({ user, setTab }: Props) {
     );
   }
 
+  const findPilotDocument = () => {
+    if (user.documents) {
+      const document = user.documents.find(
+        (doc: any) =>
+          doc.type === "license" &&
+          doc.license_type === "comercial" &&
+          doc.status === "accepted"
+      );
+      if (document) {
+        return document;
+      }
+    }
+  };
+
+  const isCommercialPilot = () => {
+    if (findPilotDocument()) {
+      return true;
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <ScrollView style={styles.cards_container}>
-        <ThemedView style={styles.card}>
-          <ThemedView style={styles.card_icon}>
-            <MaterialCommunityIcons
-              name='airplane-clock'
-              size={22}
-              color={"#2B63AA"}
-            />
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        }
+      >
+        {isCommercialPilot() && (
+          <ThemedView style={styles.card}>
+            <ThemedView style={styles.card_icon}>
+              <MaterialCommunityIcons
+                name='airplane-clock'
+                size={22}
+                color={"#2B63AA"}
+              />
+            </ThemedView>
+            <ThemedView style={styles.text_card_container}>
+              <ThemedText style={styles.text_card_description}>
+                Horas de vuelo:
+              </ThemedText>
+              <ThemedText style={styles.text_card_value}>
+                {user.flight_hours}
+              </ThemedText>
+            </ThemedView>
           </ThemedView>
-          <ThemedView style={styles.text_card_container}>
-            <ThemedText style={styles.text_card_description}>
-              Horas de vuelo:
-            </ThemedText>
-            <ThemedText style={styles.text_card_value}>
-              {user.flight_hours}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
+        )}
 
         <ThemedText
           style={{ color: "gray", marginBottom: 10, textAlign: "center" }}
@@ -83,48 +137,6 @@ export default function ProfileBody({ user, setTab }: Props) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setTab("profile-buyed-planes")}
-        >
-          <ThemedView style={styles.card_icon}>
-            <MaterialCommunityIcons
-              name='airplane-plus'
-              size={22}
-              color='#2B63AA'
-            />
-          </ThemedView>
-          <ThemedView style={styles.text_card_container}>
-            <ThemedText style={styles.text_card_description}>
-              Aeronaves compradas:
-            </ThemedText>
-            <ThemedText style={styles.text_card_value}>
-              {user.buyed_planes.length}
-            </ThemedText>
-          </ThemedView>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => setTab("profile-rented-planes")}
-        >
-          <ThemedView style={styles.card_icon}>
-            <MaterialCommunityIcons
-              name='airplane-takeoff'
-              size={22}
-              color='#2B63AA'
-            />
-          </ThemedView>
-          <ThemedView style={styles.text_card_container}>
-            <ThemedText style={styles.text_card_description}>
-              Aeronaves alquiladas:
-            </ThemedText>
-            <ThemedText style={styles.text_card_value}>
-              {user.rented_planes.length}
-            </ThemedText>
-          </ThemedView>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.card}
           onPress={() => setTab("profile-reviews")}
         >
           <ThemedView style={styles.card_icon}>
@@ -139,6 +151,40 @@ export default function ProfileBody({ user, setTab }: Props) {
             </ThemedText>
           </ThemedView>
         </TouchableOpacity>
+
+        {user._id === currentUserId && (
+          <ThemedView>
+            <ThemedText
+              style={{
+                color: "gray",
+                marginBottom: 10,
+                textAlign: "center",
+              }}
+            >
+              Solo tú puedes ver estos datos
+            </ThemedText>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => setTab("profile-buyed-planes")}
+            >
+              <ThemedView style={styles.card_icon}>
+                <MaterialCommunityIcons
+                  name='airplane-plus'
+                  size={22}
+                  color='#2B63AA'
+                />
+              </ThemedView>
+              <ThemedView style={styles.text_card_container}>
+                <ThemedText style={styles.text_card_description}>
+                  Aeronaves compradas:
+                </ThemedText>
+                <ThemedText style={styles.text_card_value}>
+                  {user.buyed_planes.length}
+                </ThemedText>
+              </ThemedView>
+            </TouchableOpacity>
+          </ThemedView>
+        )}
       </ScrollView>
     </ThemedView>
   );
@@ -147,7 +193,7 @@ export default function ProfileBody({ user, setTab }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 20,
+    padding: 10,
   },
   no_user_found: {
     textAlign: "center",
@@ -164,9 +210,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "gray",
     fontWeight: "500",
-  },
-  cards_container: {
-    paddingHorizontal: 20,
   },
   card: {
     flexDirection: "row",

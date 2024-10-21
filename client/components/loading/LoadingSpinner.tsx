@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { useEffect, useState } from "react";
+import { ThemedView } from "../ThemedView";
 
 interface Props {
   fullScreen?: boolean;
@@ -15,6 +16,8 @@ interface Props {
   style?: any;
   error?: boolean;
   fetchFunction?: () => void;
+  setTries?: (value: number) => void;
+  tries?: number;
 }
 
 export default function LoadingSpinner({
@@ -25,10 +28,11 @@ export default function LoadingSpinner({
   style,
   error,
   fetchFunction,
+  setTries,
+  tries,
 }: Props) {
   const [dots, setDots] = useState(0);
   const maxDots = 3;
-  const [tries, setTries] = useState(1);
 
   useEffect(() => {
     if (!error) {
@@ -39,7 +43,20 @@ export default function LoadingSpinner({
     }
   }, []);
 
-  console.log("d");
+  useEffect(() => {
+    if (error && setTries && tries && fetchFunction) {
+      if (tries < 3) {
+        setTimeout(() => {
+          setTries(tries + 1);
+          fetchFunction();
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          setTries(4);
+        }, 1000);
+      }
+    }
+  }, [tries]);
 
   return (
     <View
@@ -48,27 +65,24 @@ export default function LoadingSpinner({
         style,
       ]}
     >
-      {error ? (
+      {error && setTries && tries ? (
         <>
           <ThemedText style={styles.text}>
             Error al cargar la información
           </ThemedText>
-          {tries < 3 ? (
-            <TouchableOpacity style={styles.retry_button}>
-              <ThemedText
-                style={styles.retry_button_text}
-                onPress={() => {
-                  setTries(tries + 1);
-                  if (fetchFunction) fetchFunction();
-                }}
-              >
-                Intentar de nuevo ({tries}/3)
+          {tries < 4 ? (
+            <ThemedText style={styles.text}>
+              Reintentando ({tries}/3)
+            </ThemedText>
+          ) : (
+            <TouchableOpacity
+              style={styles.retry_button}
+              onPress={() => setTries(1)}
+            >
+              <ThemedText style={styles.retry_button_text}>
+                Intentar nuevamente
               </ThemedText>
             </TouchableOpacity>
-          ) : (
-            <ThemedText style={styles.text}>
-              Vuelve a intentarlo mas tarde ({tries}/3)
-            </ThemedText>
           )}
         </>
       ) : (

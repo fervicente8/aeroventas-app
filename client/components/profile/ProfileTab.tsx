@@ -4,7 +4,6 @@ import ProfileHeader from "./ProfileHeader";
 import ProfileBody from "./ProfileBody";
 import ProfileDocuments from "./ProfileDocuments";
 import ProfileBuyedPlanes from "./ProfileBuyedPlanes";
-import ProfileRentedPlanes from "./ProfileRentedPlanes";
 import ProfileReviews from "./ProfileReviews";
 import ProfileSettings from "./ProfileSettings";
 import Alert from "@/components/alerts/Alert";
@@ -40,9 +39,17 @@ interface Props {
   };
   setUser: (user: any) => void;
   onLogout: () => void;
+  loading: boolean;
+  onRefresh: () => void;
 }
 
-export default function ProfileTab({ user, setUser, onLogout }: Props) {
+export default function ProfileTab({
+  user,
+  setUser,
+  onLogout,
+  loading,
+  onRefresh,
+}: Props) {
   const [selectedTab, setSelectedTab] = useState("profile");
   const [showAlert, setShowAlert] = useState<{
     message: string;
@@ -54,6 +61,7 @@ export default function ProfileTab({ user, setUser, onLogout }: Props) {
         name={user.name}
         last_name={user.last_name}
         profile_picture={user.profile_picture}
+        documents={user.documents}
         created_at={user.created_at}
         type={user.type}
         selectedTab={selectedTab}
@@ -61,7 +69,12 @@ export default function ProfileTab({ user, setUser, onLogout }: Props) {
       />
 
       {selectedTab === "profile" ? (
-        <ProfileBody user={user} setTab={setSelectedTab} />
+        <ProfileBody
+          user={user}
+          setTab={setSelectedTab}
+          loading={loading}
+          onRefresh={onRefresh}
+        />
       ) : selectedTab === "profile-documents" ? (
         <ProfileDocuments
           user={user}
@@ -70,8 +83,6 @@ export default function ProfileTab({ user, setUser, onLogout }: Props) {
         />
       ) : selectedTab === "profile-buyed-planes" ? (
         <ProfileBuyedPlanes />
-      ) : selectedTab === "profile-rented-planes" ? (
-        <ProfileRentedPlanes />
       ) : selectedTab === "profile-reviews" ? (
         <ProfileReviews />
       ) : selectedTab === "profile-settings" ? (

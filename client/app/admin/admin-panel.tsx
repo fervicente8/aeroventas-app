@@ -24,11 +24,6 @@ export default function AdminPanel() {
             icon='pricetags'
             redirectTo='/admin/admin-aeroventas'
           />
-          <MenuCard
-            title='Aeroalquila'
-            icon='stopwatch'
-            redirectTo='/admin/admin-aeroalquila'
-          />
         </ThemedView>
       </ScrollView>
     </>

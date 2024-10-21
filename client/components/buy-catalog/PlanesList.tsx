@@ -6,6 +6,7 @@ import FilterAndSortComponent from "../searcher/FilterAndSortComponent";
 import LoadingSpinner from "../loading/LoadingSpinner";
 
 import { ThemedView } from "../ThemedView";
+import { ThemedText } from "../ThemedText";
 
 interface Plane {
   _id: string;
@@ -93,7 +94,7 @@ export default function PlanesList(props: { cat: string; brand: string }) {
               text='Cargando aeronaves en venta'
             />
           </ThemedView>
-        ) : (
+        ) : filteredPlanes.length > 0 ? (
           <Animated.FlatList
             data={filteredPlanes}
             numColumns={2}
@@ -110,6 +111,20 @@ export default function PlanesList(props: { cat: string; brand: string }) {
               { useNativeDriver: true }
             )}
           />
+        ) : (
+          <ThemedView
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingTop: filterHeight - 50,
+              paddingHorizontal: 10,
+            }}
+          >
+            <ThemedText style={{ textAlign: "center" }}>
+              No hay aeronaves que coincidan con tu búsqueda
+            </ThemedText>
+          </ThemedView>
         )}
       </ThemedView>
     </SafeAreaView>

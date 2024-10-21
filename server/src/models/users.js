@@ -45,6 +45,9 @@ const documentSchema = mongoose.Schema({
         type: String,
         enum: ["private", "comercial"]
     },
+    expiration_date: {
+        type: Date,
+    },
 });
 
 const userSchema = mongoose.Schema({
@@ -80,10 +83,6 @@ const userSchema = mongoose.Schema({
     buyed_planes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'BuyPlane'
-    }],
-    rented_planes: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'RentPlane'
     }],
     reviews_given: [reviewSchema],
     reviews_received: [reviewSchema],

@@ -1,10 +1,11 @@
 import { Image, StyleSheet, ScrollView } from "react-native";
+import Searcher from "@/components/searcher/Searcher";
+import { Link } from "expo-router";
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { Link } from "expo-router";
-import Searcher from "@/components/searcher/Searcher";
 
 export default function HomeScreen() {
   return (
@@ -26,15 +27,15 @@ export default function HomeScreen() {
           }}
         />
         <ThemedView style={styles.searcherContainer}>
-          <ThemedText style={styles.title}>Encuentra tu aeronave</ThemedText>
+          <ThemedText style={styles.title}>¿Que estás buscando hoy?</ThemedText>
           <Searcher />
         </ThemedView>
       </ThemedView>
       <ThemedView style={styles.redirectContainer}>
-        <TabBarIcon
-          style={styles.icon}
-          name={"pricetags-outline"}
+        <MaterialIcons
+          name='airplanemode-on'
           color={"#2B63AA"}
+          style={styles.icon}
         />
         <ThemedText
           type='defaultSemiBold'
@@ -62,21 +63,58 @@ export default function HomeScreen() {
         style={{ borderWidth: 0.5, width: "90%", alignSelf: "center" }}
       ></ThemedView>
       <ThemedView style={styles.redirectContainer}>
-        <TabBarIcon
+        <MaterialIcons
+          name='airplane-ticket'
           style={styles.icon}
-          name={"stopwatch-outline"}
           color={"#2B63AA"}
+        />
+
+        <ThemedText
+          type='defaultSemiBold'
+          style={{ textTransform: "uppercase" }}
+        >
+          Pasajes
+        </ThemedText>
+        <ThemedText style={styles.description}>
+          Busca tu pasaje ideal.
+        </ThemedText>
+        <Link
+          href={{
+            pathname: "/(tabs)/travel-catalog/[mode]",
+            params: { mode: "plane-ticket" },
+          }}
+        >
+          <TabBarIcon
+            style={styles.redirectIcon}
+            name={"arrow-forward-circle-outline"}
+            color={"#2B63AA"}
+          />
+        </Link>
+      </ThemedView>
+      <ThemedView
+        style={{ borderWidth: 0.5, width: "90%", alignSelf: "center" }}
+      ></ThemedView>
+      <ThemedView style={styles.redirectContainer}>
+        <MaterialIcons
+          name='person-pin'
+          color={"#2B63AA"}
+          style={styles.icon}
         />
         <ThemedText
           type='defaultSemiBold'
           style={{ textTransform: "uppercase" }}
         >
-          Alquila
+          Pilotos
         </ThemedText>
         <ThemedText style={styles.description}>
-          Alquila tu avión ideal y explora los cielos.
+          Encuentra el piloto ideal.
         </ThemedText>
-        <Link href='/rent-catalog'>
+        <Link
+          href={{
+            pathname: "/(tabs)/travel-catalog/[mode]",
+            params: { mode: "pilot" },
+          }}
+        >
           <TabBarIcon
             style={styles.redirectIcon}
             name={"arrow-forward-circle-outline"}
@@ -111,9 +149,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: 300,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
     textAlign: "center",
+    paddingHorizontal: 5,
   },
   redirectContainer: {
     paddingHorizontal: 15,
@@ -132,5 +169,6 @@ const styles = StyleSheet.create({
   },
   description: {
     marginBottom: 10,
+    textAlign: "center",
   },
 });
