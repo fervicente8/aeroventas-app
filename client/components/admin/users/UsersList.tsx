@@ -285,7 +285,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: "#333333",
     borderWidth: 1,
-    marginBottom: 30,
+    marginTop: -10,
+    marginBottom: 20,
   },
   searcher: {
     backgroundColor: "transparent",
