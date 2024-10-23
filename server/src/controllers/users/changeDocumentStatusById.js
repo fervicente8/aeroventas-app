@@ -1,7 +1,7 @@
 const usersSchema = require("../../models/users.js");
 
 const changeDocumentStatusById = async (req, res) => {
-    const { userId, documentId, status } = req.body;
+    const { userId, documentId, status, expirationDate, licenseNumber, reviewerId, rejectReason } = req.body;
 
     let user = await usersSchema.findById(userId);
 
@@ -17,6 +17,23 @@ const changeDocumentStatusById = async (req, res) => {
         }
 
         document.status = status;
+
+        if (status === "accepted") {
+            document.reviewer_id = reviewerId;
+            document.expiration_date = expirationDate;
+        }
+        if (status === "rejected") {
+            document.reject_reason = rejectReason;
+        }
+        if (status === "pending" || status === "rejected") {
+            document.reviewer_id = reviewerId;
+            document.license_number = null;
+            document.expiration_date = null;
+        }
+
+        if (document.type === "license") {
+            document.license_number = licenseNumber;
+        }
 
         user.documents = user.documents.map((doc) => {
             if (doc._id === documentId) {

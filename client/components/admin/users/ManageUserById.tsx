@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000090",
   },
   modal_content_container: {
-    maxWidth: "80%",
+    maxWidth: "95%",
     gap: 15,
     padding: 20,
     borderRadius: 10,

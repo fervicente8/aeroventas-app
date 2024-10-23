@@ -80,7 +80,7 @@ export default function DocumentComponent({
         <ThemedView style={styles.no_document_container}>
           {isAdding !== type ? (
             <>
-              <ThemedText style={{ color: "white" }}>
+              <ThemedText style={{ color: "white", fontSize: 14 }}>
                 Agregá tu documento
               </ThemedText>
               <TouchableOpacity onPress={() => setIsAdding(type)}>
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   document_title: {
     color: "white",
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "600",
     marginBottom: 10,
   },
@@ -132,11 +132,11 @@ const styles = StyleSheet.create({
   },
   document_status: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 0,
+    right: 0,
     color: "white",
     padding: 5,
-    borderRadius: 5,
+    borderBottomLeftRadius: 5,
   },
   document_status_pending: {
     backgroundColor: "orange",

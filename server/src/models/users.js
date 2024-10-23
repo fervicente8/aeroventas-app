@@ -48,6 +48,20 @@ const documentSchema = mongoose.Schema({
     expiration_date: {
         type: Date,
     },
+    license_number: {
+        type: String
+    },
+    reviewer_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    reviewed_at: {
+        type: Date,
+        default: Date.now
+    },
+    reject_reason: {
+        type: String
+    }
 });
 
 const userSchema = mongoose.Schema({

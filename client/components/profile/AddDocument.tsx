@@ -410,13 +410,13 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   front_text: {
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "flex-start",
     color: "white",
     textDecorationColor: "white",
   },
   back_text: {
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "flex-start",
     color: "white",
     marginTop: 20,

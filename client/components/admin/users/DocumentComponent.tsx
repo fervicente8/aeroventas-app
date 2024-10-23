@@ -4,14 +4,18 @@ import {
   Image,
   Modal,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import AdminOptionCard from "../components/AdminOptionCard";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import AdminOptionCard from "../components/AdminOptionCard";
 
 interface Document {
   _id: string;
@@ -40,12 +44,19 @@ export default function DocumentComponent({
   faster,
   documents,
 }: Props) {
+  const [reviewerId, setReviewerId] = useState();
   const [openModalCarousel, setOpenModalCarousel] = useState(false);
   const [imagesHeight, setImagesHeight] = useState(0);
   const [openSettings, setOpenSettings] = useState(false);
   const [settingsTab, setSettingsTab] = useState(0);
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [expirationDate, setExpirationDate] = useState(new Date());
+  const [toApprove, setToApprove] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [toReject, setToReject] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const date = new Date(document?.created_at);
-  const formatedDate = date.toLocaleDateString("es-AR");
+  const formattedDate = date.toLocaleDateString("es-AR");
 
   const translateType = (type: string) => {
     if (type === "dni") {
@@ -67,6 +78,16 @@ export default function DocumentComponent({
     }
   }, [document.files_url[0]]);
 
+  const getReviewer = async () => {
+    const user = await AsyncStorage.getItem("user");
+    const userJson = JSON.parse(user || "{}");
+    setReviewerId(userJson._id);
+  };
+
+  useEffect(() => {
+    getReviewer();
+  }, []);
+
   const verifyStatus = (status: string, option: string) => {
     if (status === option) {
       return true;
@@ -81,24 +102,75 @@ export default function DocumentComponent({
     );
   };
 
-  const changeStatus = async (status: string) => {
+  const onChangeDate = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate;
+    setShowDatePicker(Platform.OS === "ios");
+    setExpirationDate(currentDate);
+  };
+
+  const restartAll = () => {
+    setOpenSettings(false);
+    setSettingsTab(0);
+    setShowDatePicker(false);
+    setToApprove(false);
+    setToReject(false);
+    setRejectReason("");
+    setExpirationDate(new Date());
+    setLicenseNumber("");
+  };
+
+  const changeStatus = async (status: string, type?: string) => {
+    let body;
+
     try {
+      if (status === "rejected") {
+        body = {
+          userId: userId,
+          documentId: document._id,
+          status: status,
+          reviewerId: reviewerId,
+          rejectReason: rejectReason,
+        };
+      } else if (status === "accepted") {
+        if (type === "license") {
+          body = {
+            userId: userId,
+            documentId: document._id,
+            status: status,
+            expirationDate: expirationDate,
+            licenseNumber: licenseNumber,
+            reviewerId: reviewerId,
+          };
+        } else {
+          body = {
+            userId: userId,
+            documentId: document._id,
+            status: status,
+            expirationDate: expirationDate,
+            reviewerId: reviewerId,
+          };
+        }
+      } else if (status === "pending") {
+        body = {
+          userId: userId,
+          documentId: document._id,
+          status: status,
+          reviewerId: reviewerId,
+        };
+      }
+
       const response = await fetch(`${apiUrl}/update-document-status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          userId: userId,
-          documentId: document._id,
-          status: status,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (response.status === 200) {
-        setOpenSettings(false);
+        restartAll();
         if (faster) {
           setDocuments(filterFromDocumentsById(document._id));
         } else {
@@ -108,13 +180,13 @@ export default function DocumentComponent({
           message: "Cambio de estado exitoso",
         });
       } else if (response.status === 404) {
-        setOpenSettings(false);
+        restartAll();
         setShowAlert({
           message: "Error al buscar el usuario o el documento",
         });
       }
     } catch (error) {
-      setOpenSettings(false);
+      restartAll();
       setShowAlert({
         message: "Error al cambiar el estado del documento",
       });
@@ -131,7 +203,7 @@ export default function DocumentComponent({
           {translateType(document?.type)}
         </ThemedText>
         <ThemedText style={styles.date} ellipsizeMode='tail' numberOfLines={1}>
-          Desde {formatedDate}
+          Desde {formattedDate}
         </ThemedText>
       </ThemedView>
       {faster ? (
@@ -185,7 +257,7 @@ export default function DocumentComponent({
         <ThemedView style={styles.modal_container}>
           <TouchableOpacity
             style={{ position: "absolute", right: 10, top: 10, zIndex: 1 }}
-            onPress={() => setOpenSettings(false)}
+            onPress={() => restartAll()}
           >
             <Ionicons name='close' size={32} color='white' />
           </TouchableOpacity>
@@ -244,6 +316,24 @@ export default function DocumentComponent({
               </>
             ) : settingsTab === 1 ? (
               <>
+                <Carousel
+                  width={Dimensions.get("window").width}
+                  height={200}
+                  data={document.files_url}
+                  mode='parallax'
+                  modeConfig={{
+                    parallaxScrollingScale: 1,
+                    parallaxScrollingOffset: 0,
+                  }}
+                  renderItem={({ item }) => (
+                    <Image
+                      style={{ width: "100%", height: imagesHeight }}
+                      source={{ uri: item }}
+                      resizeMode='cover'
+                    />
+                  )}
+                  style={{ flex: 1, alignItems: "center" }}
+                />
                 <AdminOptionCard
                   title='Pendiente'
                   icon='check'
@@ -258,21 +348,104 @@ export default function DocumentComponent({
                   icon='check'
                   tabToRedirect='1'
                   setTab={() => {
-                    changeStatus("accepted");
+                    setToApprove(true);
+                    setToReject(false);
                   }}
                   disabled={verifyStatus("accepted", document.status)}
                   iconColor='#008f39'
                 />
+                {toApprove && (
+                  <ThemedView>
+                    <TouchableOpacity>
+                      <ThemedText
+                        style={styles.approve_data_expiration_date}
+                        onPress={() => setShowDatePicker(true)}
+                      >
+                        Vencimiento: {expirationDate.toLocaleDateString()}
+                      </ThemedText>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                      <DateTimePicker
+                        value={expirationDate}
+                        mode='date'
+                        display='spinner'
+                        onChange={(event, selectedDate) =>
+                          onChangeDate(event, selectedDate)
+                        }
+                        minimumDate={new Date()}
+                      />
+                    )}
+                    {document.type === "license" && (
+                      <TextInput
+                        style={styles.approve_data_input}
+                        placeholderTextColor={"gray"}
+                        placeholder='N° de Licencia'
+                        value={licenseNumber}
+                        onChangeText={setLicenseNumber}
+                      />
+                    )}
+
+                    <TouchableOpacity
+                      style={[
+                        styles.accept_approve_button,
+                        document.type === "license" &&
+                          !licenseNumber && {
+                            backgroundColor: "#EBEBE4",
+                          },
+                      ]}
+                      onPress={() => {
+                        changeStatus("accepted", document.type);
+                      }}
+                      disabled={document.type === "license" && !licenseNumber}
+                    >
+                      <ThemedText style={styles.accept_approve_text}>
+                        Aprobar
+                      </ThemedText>
+                    </TouchableOpacity>
+                  </ThemedView>
+                )}
+
                 <AdminOptionCard
                   title='Rechazado'
                   icon='close'
                   tabToRedirect='1'
                   setTab={() => {
-                    changeStatus("rejected");
+                    setToReject(true);
+                    setToApprove(false);
                   }}
                   disabled={verifyStatus("rejected", document.status)}
                   iconColor='#DA373A'
                 />
+                {toReject && (
+                  <ThemedView>
+                    <TextInput
+                      style={styles.reject_reason_input}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical='top'
+                      placeholderTextColor={"gray"}
+                      placeholder='Motivo de rechazo'
+                      value={rejectReason}
+                      onChangeText={setRejectReason}
+                    />
+                    <TouchableOpacity
+                      style={[
+                        styles.accept_reject_button,
+                        !rejectReason && {
+                          backgroundColor: "#EBEBE4",
+                        },
+                      ]}
+                      onPress={() => {
+                        changeStatus("rejected");
+                      }}
+                      disabled={!rejectReason}
+                    >
+                      <ThemedText style={styles.accept_reject_text}>
+                        Rechazar
+                      </ThemedText>
+                    </TouchableOpacity>
+                  </ThemedView>
+                )}
               </>
             ) : (
               <ThemedView style={styles.set_document_container}></ThemedView>
@@ -337,7 +510,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000090",
   },
   settings_container: {
-    width: "88%",
+    width: "95%",
     backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
@@ -364,6 +537,53 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     zIndex: 1,
+  },
+  approve_data_expiration_date: {
+    fontSize: 14,
+    backgroundColor: "#E8E8E8",
+    borderRadius: 5,
+    padding: 10,
+    textAlign: "center",
+  },
+  approve_data_input: {
+    fontSize: 14,
+    textAlign: "center",
+    backgroundColor: "#E8E8E8",
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 5,
+  },
+  accept_approve_button: {
+    marginTop: 10,
+    marginBottom: 20,
+    backgroundColor: "#008f39",
+    padding: 10,
+    borderRadius: 5,
+  },
+  accept_approve_text: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+  reject_reason_input: {
+    fontSize: 14,
+    textAlignVertical: "top",
+    backgroundColor: "#E8E8E8",
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 5,
+  },
+  accept_reject_button: {
+    marginTop: 10,
+    marginBottom: 20,
+    backgroundColor: "#DA373A",
+    padding: 10,
+    borderRadius: 5,
+  },
+  accept_reject_text: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "600",
   },
   set_document_container: {
     flex: 1,
